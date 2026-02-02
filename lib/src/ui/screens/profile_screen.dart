@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../state/employee_auth_provider.dart';
 import '../../state/order_provider.dart';
 import '../format.dart';
+import 'edit_pos_order_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -354,9 +355,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: TextStyle(fontWeight: FontWeight.w900, color: scheme.primary),
                             ),
                             onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('عرض الطلب من شاشة "طلباتي". التعديل متاح فقط عند الحالة "معلق".')),
-                              );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => EditPosOrderScreen(orderId: o.id)),
+                              ).then((_) => orders.loadMyPendingPosOrders());
                             },
                           ),
                         );

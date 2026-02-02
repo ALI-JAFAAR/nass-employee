@@ -9,7 +9,7 @@ class AppConfig {
   /// `flutter build apk --release --dart-define=API_BASE_URL=https://your-domain.com`
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://127.0.0.1:8000',
-    // defaultValue: 'https://nassiq.com/backend/public',
+    // defaultValue: 'http://127.0.0.1:8000',
+    defaultValue: 'https://nassiq.com/backend/public',
   );
 }

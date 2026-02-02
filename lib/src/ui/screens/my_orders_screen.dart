@@ -41,6 +41,43 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     });
   }
 
+  String _statusLabel(String s) {
+    switch (s) {
+      case 'pending':
+        return 'قيد المراجعة';
+      case 'suspended':
+        return 'معلق';
+      case 'confirmed':
+        return 'مؤكد';
+      case 'shipped':
+        return 'قيد التوصيل';
+      case 'delivered':
+        return 'تم التسليم';
+      case 'cancelled':
+        return 'ملغي';
+      default:
+        return s.isEmpty ? '—' : s;
+    }
+  }
+
+  Color _statusColor(ColorScheme scheme, String s) {
+    switch (s) {
+      case 'suspended':
+        return Colors.red;
+      case 'confirmed':
+        return Colors.orange;
+      case 'shipped':
+        return Colors.blue;
+      case 'delivered':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.grey;
+      case 'pending':
+      default:
+        return scheme.primary;
+    }
+  }
+
   Future<void> _openDetails(PosOrderLite o) async {
     final op = context.read<OrderProvider>();
     Map<String, dynamic>? full;
@@ -89,7 +126,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
-                                o.status,
+                                _statusLabel(o.status),
                                 style: TextStyle(color: scheme.onPrimaryContainer, fontWeight: FontWeight.w900, fontSize: 12),
                               ),
                             ),
@@ -145,7 +182,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (o.status == 'suspended')
+                        if (o.status == 'pending' || o.status == 'suspended')
                           FilledButton.icon(
                             onPressed: () async {
                               Navigator.pop(ctx);
@@ -157,7 +194,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                               await context.read<OrderProvider>().loadMyOrders(q: _qCtrl.text);
                             },
                             icon: const Icon(Icons.edit_outlined),
-                            label: const Text('تعديل الطلب (معلق فقط)'),
+                            label: Text(o.status == 'suspended' ? 'تعديل الطلب (معلق)' : 'تعديل الطلب'),
                           )
                         else
                           FilledButton.tonal(
@@ -231,9 +268,8 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                       separatorBuilder: (context, index) => const SizedBox(height: 10),
                       itemBuilder: (context, i) {
                         final o = orders.myOrders[i];
-                        final statusColor = o.status == 'suspended'
-                            ? Colors.red
-                            : (o.status == 'confirmed' ? Colors.orange : scheme.primary);
+                        final statusColor = _statusColor(scheme, o.status);
+                        final statusText = _statusLabel(o.status);
                         return InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _openDetails(o),
@@ -290,7 +326,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                         color: statusColor.withValues(alpha: 14),
                                         borderRadius: BorderRadius.circular(999),
                                       ),
-                                      child: Text(o.status, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: statusColor)),
+                                      child: Text(statusText, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: statusColor)),
                                     ),
                                   ],
                                 ),
