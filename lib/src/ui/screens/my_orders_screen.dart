@@ -138,10 +138,15 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                             children: [
                               _kv('الزبون', o.customerName ?? '—'),
                               _kv('الهاتف', o.customerPhone ?? '—', ltr: true),
-                              _kv('مودن', '${o.deliveryCityName ?? '—'} • ${o.deliveryRegionName ?? '—'}'),
+                              _kv(
+                                'التوصيل',
+                                (o.deliveryProvider == 'nass')
+                                    ? 'توصيل داخلي (مندوب الشركة)'
+                                    : 'مودن: ${o.deliveryCityName ?? '—'} • ${o.deliveryRegionName ?? '—'}',
+                              ),
                               _kv('أقرب نقطة', o.addressText ?? '—'),
                               if ((o.merchantNotes ?? '').isNotEmpty) _kv('ملاحظات للمندوب', o.merchantNotes!),
-                              _kv('حالة مودن', o.modonStatus ?? '—'),
+                              if (o.deliveryProvider != 'nass') _kv('حالة مودن', o.modonStatus ?? '—'),
                               const Divider(),
                               Text('الأصناف', style: (t.titleSmall ?? const TextStyle()).copyWith(fontWeight: FontWeight.w900)),
                               const SizedBox(height: 6),
@@ -303,9 +308,11 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                       Text(
                                         [
                                           if ((o.customerPhone ?? '').isNotEmpty) o.customerPhone,
-                                          if ((o.deliveryCityName ?? '').isNotEmpty || (o.deliveryRegionName ?? '').isNotEmpty)
+                                          if (o.deliveryProvider == 'nass') 'توصيل داخلي',
+                                          if (o.deliveryProvider != 'nass' &&
+                                              ((o.deliveryCityName ?? '').isNotEmpty || (o.deliveryRegionName ?? '').isNotEmpty))
                                             '${o.deliveryCityName ?? '—'} • ${o.deliveryRegionName ?? '—'}',
-                                          if ((o.modonStatus ?? '').isNotEmpty) 'مودن: ${o.modonStatus}',
+                                          if (o.deliveryProvider != 'nass' && (o.modonStatus ?? '').isNotEmpty) 'مودن: ${o.modonStatus}',
                                         ].whereType<String>().join('  •  '),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,

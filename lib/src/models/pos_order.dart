@@ -16,6 +16,7 @@ class PosOrderLite {
   final String? modonStatus;
   final String? merchantNotes;
   final String? suspendedNote;
+  final String? deliveryProvider; // modon | nass
 
   PosOrderLite({
     required this.id,
@@ -35,6 +36,7 @@ class PosOrderLite {
     this.modonStatus,
     this.merchantNotes,
     this.suspendedNote,
+    this.deliveryProvider,
   });
 
   factory PosOrderLite.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,7 @@ class PosOrderLite {
       modonStatus: json['modon_status'] as String?,
       merchantNotes: json['merchant_notes'] as String?,
       suspendedNote: json['suspended_note'] as String?,
+      deliveryProvider: json['delivery_provider'] as String?,
     );
   }
 }

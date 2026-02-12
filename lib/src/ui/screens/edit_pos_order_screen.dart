@@ -335,11 +335,11 @@ class _EditPosOrderScreenState extends State<EditPosOrderScreen> {
       return;
     }
     if (_modonCityId <= 0 || _modonRegionId <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى اختيار مدينة مودن والمنطقة')),
-      );
-      return;
-    }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('يرجى اختيار مدينة مودن والمنطقة')),
+        );
+        return;
+      }
 
     final phoneErr = Format.validateIraqiPhone(phone);
     if (phoneErr != null) {
