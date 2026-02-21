@@ -59,21 +59,47 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       context: context,
       showDragHandle: true,
       builder: (ctx) {
-        final items = loc.cities;
-        return ListView(
-          padding: const EdgeInsets.all(12),
-          children: [
-            const ListTile(
-              title: Text('اختر مدينة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
-            ),
-            ...items.map(
-              (c) => ListTile(
-                leading: const Icon(Icons.location_city_outlined),
-                title: Text(c.name),
-                onTap: () => Navigator.pop(ctx, c.id),
-              ),
-            ),
-          ],
+        final all = loc.cities;
+        String q = '';
+        return StatefulBuilder(
+          builder: (ctx2, setSt) {
+            final items = q.trim().isEmpty
+                ? all
+                : all.where((c) => c.name.toLowerCase().contains(q.trim().toLowerCase())).toList();
+            return Column(
+              children: [
+                const SizedBox(height: 6),
+                const ListTile(
+                  title: Text('اختر مدينة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: 'بحث...',
+                    ),
+                    onChanged: (v) => setSt(() => q = v),
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: items.length,
+                    itemBuilder: (cctx, i) {
+                      final c = items[i];
+                      return ListTile(
+                        leading: const Icon(Icons.location_city_outlined),
+                        title: Text(c.name),
+                        onTap: () => Navigator.pop(ctx, c.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -102,20 +128,47 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       context: context,
       showDragHandle: true,
       builder: (ctx) {
-        return ListView(
-          padding: const EdgeInsets.all(12),
-          children: [
-            const ListTile(
-              title: Text('اختر منطقة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
-            ),
-            ...items.map(
-              (r) => ListTile(
-                leading: const Icon(Icons.map_outlined),
-                title: Text(r.name),
-                onTap: () => Navigator.pop(ctx, r.id),
-              ),
-            ),
-          ],
+        final all = items;
+        String q = '';
+        return StatefulBuilder(
+          builder: (ctx2, setSt) {
+            final filtered = q.trim().isEmpty
+                ? all
+                : all.where((r) => r.name.toLowerCase().contains(q.trim().toLowerCase())).toList();
+            return Column(
+              children: [
+                const SizedBox(height: 6),
+                const ListTile(
+                  title: Text('اختر منطقة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: 'بحث...',
+                    ),
+                    onChanged: (v) => setSt(() => q = v),
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: filtered.length,
+                    itemBuilder: (cctx, i) {
+                      final r = filtered[i];
+                      return ListTile(
+                        leading: const Icon(Icons.map_outlined),
+                        title: Text(r.name),
+                        onTap: () => Navigator.pop(ctx, r.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -678,8 +731,9 @@ class _ProductCard extends StatelessWidget {
     final cart = context.read<CartProvider>();
 
     Future<void> add() async {
-      if (product.variants.isEmpty) {
-        cart.add(product);
+      if (product.addWithoutVariantSelection) {
+        final v = product.variants.isNotEmpty ? product.variants.first : null;
+        cart.add(product, variant: v);
         return;
       }
       final selected = await showModalBottomSheet<ProductVariant>(
@@ -706,6 +760,8 @@ class _ProductCard extends StatelessWidget {
 
     final scheme = Theme.of(context).colorScheme;
     final inStock = product.stock > 0;
+    // Agency products can be added even with 0 stock (fulfilled by agency)
+    final canAdd = inStock || product.isAgencyProduct;
 
     const ok = Color(0xFF16A34A); // green-600
     const bad = Color(0xFFB91C1C); // red-700
@@ -714,7 +770,7 @@ class _ProductCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: !inStock ? null : add,
+        onTap: !canAdd ? null : add,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -739,20 +795,43 @@ class _ProductCard extends StatelessWidget {
                   Positioned(
                     top: 10,
                     left: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: badgeBg,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        'المتوفر: ${product.stock}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: badgeBg,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            'المتوفر: ${product.stock}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
+                        if (product.isAgencyProduct) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade700.withValues(alpha: 0.95),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: const Text(
+                              'من الوكالة',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                   Positioned(
@@ -792,14 +871,14 @@ class _ProductCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          '${Format.money(product.price)} د.ع',
+                          '${Format.money(product.displayPrice)} د.ع',
                           style: TextStyle(fontWeight: FontWeight.w900, color: scheme.primary),
                         ),
                       ),
                       IconButton.filledTonal(
-                        onPressed: !inStock ? null : add,
-                        icon: Icon(product.variants.isEmpty ? Icons.add : Icons.tune),
-                        tooltip: product.variants.isEmpty ? 'إضافة' : 'اختيار نوع',
+                        onPressed: !canAdd ? null : add,
+                        icon: Icon(product.addWithoutVariantSelection ? Icons.add : Icons.tune),
+                        tooltip: product.addWithoutVariantSelection ? 'إضافة' : 'اختيار نوع',
                       ),
                     ],
                   ),

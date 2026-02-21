@@ -24,10 +24,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    if (!mounted) return;
     setState(() => _error = null);
     final username = _userCtrl.text.trim();
     final password = _passCtrl.text;
     if (username.isEmpty || password.isEmpty) {
+      if (!mounted) return;
       setState(() => _error = 'رجاءً أدخل اسم المستخدم وكلمة المرور');
       return;
     }
@@ -37,6 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
     }
   }

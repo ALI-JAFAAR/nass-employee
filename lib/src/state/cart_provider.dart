@@ -11,7 +11,12 @@ class CartLine {
 
   int get productId => product.id;
   int? get variantId => variant?.id;
-  double get unitPrice => variant?.price ?? product.price;
+  /// Use displayPrice as product price; prefer variant price only when it's valid (> 0)
+  double get unitPrice {
+    final vp = variant?.price;
+    if (vp != null && vp > 0) return vp;
+    return product.displayPrice;
+  }
   double get lineTotal => unitPrice * quantity;
 
   String get key => '${product.id}:${variant?.id ?? 0}';

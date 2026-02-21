@@ -38,6 +38,8 @@ class Product {
   final int stock;
   final String? image;
   final List<ProductVariant> variants;
+  final bool isAgencyProduct;
+  final double? agencyPrice;
 
   Product({
     required this.id,
@@ -47,7 +49,19 @@ class Product {
     this.sku,
     this.image,
     this.variants = const [],
+    this.isAgencyProduct = false,
+    this.agencyPrice,
   });
+
+  /// Agency products: add without variant picker, use single price.
+  bool get addWithoutVariantSelection =>
+      isAgencyProduct || variants.isEmpty || variants.length == 1;
+
+  /// Display price: prefer agency_price when product is agency and price is 0.
+  double get displayPrice =>
+      (isAgencyProduct && (price == 0 || price.isNaN) && agencyPrice != null)
+          ? agencyPrice!
+          : price;
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final vars = (json['variants'] as List?) ?? const [];
@@ -59,6 +73,8 @@ class Product {
       stock: (json['stock'] as num?)?.toInt() ?? 0,
       image: json['image'] as String?,
       variants: vars.whereType<Map<String, dynamic>>().map(ProductVariant.fromJson).toList(),
+      isAgencyProduct: (json['is_agency_product'] as bool?) ?? false,
+      agencyPrice: (json['agency_price'] as num?)?.toDouble(),
     );
   }
 }

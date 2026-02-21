@@ -101,21 +101,47 @@ class _EditPosOrderScreenState extends State<EditPosOrderScreen> {
       context: context,
       showDragHandle: true,
       builder: (ctx) {
-        final items = loc.cities;
-        return ListView(
-          padding: const EdgeInsets.all(12),
-          children: [
-            const ListTile(
-              title: Text('اختر مدينة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
-            ),
-            ...items.map(
-              (c) => ListTile(
-                leading: const Icon(Icons.location_city_outlined),
-                title: Text(c.name),
-                onTap: () => Navigator.pop(ctx, c.id),
-              ),
-            ),
-          ],
+        final all = loc.cities;
+        String q = '';
+        return StatefulBuilder(
+          builder: (ctx2, setSt) {
+            final items = q.trim().isEmpty
+                ? all
+                : all.where((c) => c.name.toLowerCase().contains(q.trim().toLowerCase())).toList();
+            return Column(
+              children: [
+                const SizedBox(height: 6),
+                const ListTile(
+                  title: Text('اختر مدينة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: 'بحث...',
+                    ),
+                    onChanged: (v) => setSt(() => q = v),
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: items.length,
+                    itemBuilder: (cctx, i) {
+                      final c = items[i];
+                      return ListTile(
+                        leading: const Icon(Icons.location_city_outlined),
+                        title: Text(c.name),
+                        onTap: () => Navigator.pop(ctx, c.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -144,20 +170,47 @@ class _EditPosOrderScreenState extends State<EditPosOrderScreen> {
       context: context,
       showDragHandle: true,
       builder: (ctx) {
-        return ListView(
-          padding: const EdgeInsets.all(12),
-          children: [
-            const ListTile(
-              title: Text('اختر منطقة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
-            ),
-            ...items.map(
-              (r) => ListTile(
-                leading: const Icon(Icons.map_outlined),
-                title: Text(r.name),
-                onTap: () => Navigator.pop(ctx, r.id),
-              ),
-            ),
-          ],
+        final all = items;
+        String q = '';
+        return StatefulBuilder(
+          builder: (ctx2, setSt) {
+            final filtered = q.trim().isEmpty
+                ? all
+                : all.where((r) => r.name.toLowerCase().contains(q.trim().toLowerCase())).toList();
+            return Column(
+              children: [
+                const SizedBox(height: 6),
+                const ListTile(
+                  title: Text('اختر منطقة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: 'بحث...',
+                    ),
+                    onChanged: (v) => setSt(() => q = v),
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: filtered.length,
+                    itemBuilder: (cctx, i) {
+                      final r = filtered[i];
+                      return ListTile(
+                        leading: const Icon(Icons.map_outlined),
+                        title: Text(r.name),
+                        onTap: () => Navigator.pop(ctx, r.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -718,7 +771,7 @@ class _ProductCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          '${Format.money(product.price)} د.ع',
+                          '${Format.money(product.displayPrice)} د.ع',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w900,
