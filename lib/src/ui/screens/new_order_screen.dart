@@ -60,12 +60,12 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       showDragHandle: true,
       builder: (ctx) {
         final all = loc.cities;
-        String q = '';
+        String searchQ = '';
         return StatefulBuilder(
           builder: (ctx2, setSt) {
-            final items = q.trim().isEmpty
+            final items = searchQ.trim().isEmpty
                 ? all
-                : all.where((c) => c.name.toLowerCase().contains(q.trim().toLowerCase())).toList();
+                : all.where((c) => c.name.toLowerCase().contains(searchQ.trim().toLowerCase())).toList();
             return Column(
               children: [
                 const SizedBox(height: 6),
@@ -79,7 +79,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       prefixIcon: Icon(Icons.search),
                       hintText: 'بحث...',
                     ),
-                    onChanged: (v) => setSt(() => q = v),
+                    onChanged: (v) => setSt(() => searchQ = v),
                   ),
                 ),
                 const Divider(height: 1),
@@ -129,12 +129,12 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
       showDragHandle: true,
       builder: (ctx) {
         final all = items;
-        String q = '';
+        String regionSearchQ = '';
         return StatefulBuilder(
           builder: (ctx2, setSt) {
-            final filtered = q.trim().isEmpty
+            final filtered = regionSearchQ.trim().isEmpty
                 ? all
-                : all.where((r) => r.name.toLowerCase().contains(q.trim().toLowerCase())).toList();
+                : all.where((r) => r.name.toLowerCase().contains(regionSearchQ.trim().toLowerCase())).toList();
             return Column(
               children: [
                 const SizedBox(height: 6),
@@ -148,7 +148,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       prefixIcon: Icon(Icons.search),
                       hintText: 'بحث...',
                     ),
-                    onChanged: (v) => setSt(() => q = v),
+                    onChanged: (v) => setSt(() => regionSearchQ = v),
                   ),
                 ),
                 const Divider(height: 1),
