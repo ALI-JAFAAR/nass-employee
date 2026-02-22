@@ -9,6 +9,7 @@ import '../../models/product.dart';
 import '../../state/cart_provider.dart';
 import '../../state/catalog_provider.dart';
 import '../../state/modon_locations_provider.dart';
+import '../widgets/modon_search_sheet.dart';
 import '../../state/order_provider.dart';
 import '../format.dart';
 
@@ -100,50 +101,17 @@ class _EditPosOrderScreenState extends State<EditPosOrderScreen> {
     final picked = await showModalBottomSheet<int>(
       context: context,
       showDragHandle: true,
-      builder: (ctx) {
-        final all = loc.cities;
-        String searchQ = '';
-        return StatefulBuilder(
-          builder: (ctx2, setSt) {
-            final items = searchQ.trim().isEmpty
-                ? all
-                : all.where((c) => c.name.toLowerCase().contains(searchQ.trim().toLowerCase())).toList();
-            return Column(
-              children: [
-                const SizedBox(height: 6),
-                const ListTile(
-                  title: Text('اختر مدينة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.search),
-                      hintText: 'بحث...',
-                    ),
-                    onChanged: (v) => setSt(() => searchQ = v),
-                  ),
-                ),
-                const Divider(height: 1),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: items.length,
-                    itemBuilder: (cctx, i) {
-                      final c = items[i];
-                      return ListTile(
-                        leading: const Icon(Icons.location_city_outlined),
-                        title: Text(c.name),
-                        onTap: () => Navigator.pop(ctx, c.id),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, _) => ModonCitySearchSheet(
+          items: loc.cities,
+          modalContext: ctx,
+        ),
+      ),
     );
 
     if (!mounted) return;
@@ -169,50 +137,17 @@ class _EditPosOrderScreenState extends State<EditPosOrderScreen> {
     final picked = await showModalBottomSheet<int>(
       context: context,
       showDragHandle: true,
-      builder: (ctx) {
-        final all = items;
-        String regionSearchQ = '';
-        return StatefulBuilder(
-          builder: (ctx2, setSt) {
-            final filtered = regionSearchQ.trim().isEmpty
-                ? all
-                : all.where((r) => r.name.toLowerCase().contains(regionSearchQ.trim().toLowerCase())).toList();
-            return Column(
-              children: [
-                const SizedBox(height: 6),
-                const ListTile(
-                  title: Text('اختر منطقة مودن', style: TextStyle(fontWeight: FontWeight.w900)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.search),
-                      hintText: 'بحث...',
-                    ),
-                    onChanged: (v) => setSt(() => regionSearchQ = v),
-                  ),
-                ),
-                const Divider(height: 1),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: filtered.length,
-                    itemBuilder: (cctx, i) {
-                      final r = filtered[i];
-                      return ListTile(
-                        leading: const Icon(Icons.map_outlined),
-                        title: Text(r.name),
-                        onTap: () => Navigator.pop(ctx, r.id),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, _) => ModonRegionSearchSheet(
+          items: items,
+          modalContext: ctx,
+        ),
+      ),
     );
     if (!mounted) return;
     if (picked != null && picked > 0) {
